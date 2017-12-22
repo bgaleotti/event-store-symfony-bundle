@@ -17,9 +17,10 @@ use Prooph\Bundle\EventStore\ProophEventStoreBundle;
 use Prooph\EventStore\EventStore;
 use Prooph\SnapshotStore\SnapshotStore;
 use ProophTest\Bundle\EventStore\DependencyInjection\Fixture\Model\BlackHoleRepository;
+use ProophTest\Bundle\EventStore\DependencyInjection\Fixture\TestServices;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
-use Symfony\Component\DependencyInjection\Compiler\ResolveDefinitionTemplatesPass;
+use Symfony\Component\DependencyInjection\Compiler\ResolveChildDefinitionsPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Dumper\Dumper;
 use Symfony\Component\DependencyInjection\Dumper\XmlDumper;
@@ -46,12 +47,12 @@ abstract class AbstractEventStoreExtensionTestCase extends TestCase
     {
         $container = $this->loadContainer('event_store');
 
-        $config = $container->getDefinition('prooph_event_store.main_store');
+        $config = $container->getDefinition(TestServices::EVENT_STORE_SERVICE_ID_PREFIX . 'main_store');
 
         self::assertEquals(EventStore::class, $config->getClass());
 
         /* @var $eventStore EventStore */
-        $eventStore = $container->get('prooph_event_store.main_store');
+        $eventStore = $container->get(TestServices::EVENT_STORE_SERVICE_ID_PREFIX . 'main_store');
         self::assertInstanceOf(EventStore::class, $eventStore);
 
         $repository = $container->get('todo_list');
@@ -69,12 +70,12 @@ abstract class AbstractEventStoreExtensionTestCase extends TestCase
         $container = $this->loadContainer('event_store_multiple');
 
         foreach (['main_store', 'second_store'] as $name) {
-            $config = $container->getDefinition('prooph_event_store.' . $name);
+            $config = $container->getDefinition(TestServices::EVENT_STORE_SERVICE_ID_PREFIX . $name);
 
             self::assertEquals(EventStore::class, $config->getClass());
 
             //* @var $eventStore EventStore */
-            $eventStore = $container->get('prooph_event_store.' . $name);
+            $eventStore = $container->get(TestServices::EVENT_STORE_SERVICE_ID_PREFIX . $name);
             self::assertInstanceOf(EventStore::class, $eventStore);
 
             $repository = $container->get($name . '.todo_list');
@@ -135,7 +136,7 @@ abstract class AbstractEventStoreExtensionTestCase extends TestCase
     {
         $bundle = new ProophEventStoreBundle();
         $bundle->build($container);
-        $container->getCompilerPassConfig()->setOptimizationPasses([new ResolveDefinitionTemplatesPass()]);
+        $container->getCompilerPassConfig()->setOptimizationPasses([new ResolveChildDefinitionsPass()]);
         $container->getCompilerPassConfig()->setRemovingPasses([]);
 
         $container->compile();

@@ -21,8 +21,9 @@ use Prooph\EventStore\Metadata\MetadataEnricherAggregate;
 use Prooph\EventStore\Metadata\MetadataEnricherPlugin;
 use ProophTest\Bundle\EventStore\DependencyInjection\Fixture\Plugin\BlackHole;
 use ProophTest\Bundle\EventStore\DependencyInjection\Fixture\Plugin\GlobalBlackHole;
+use ProophTest\Bundle\EventStore\DependencyInjection\Fixture\TestServices;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\Compiler\ResolveDefinitionTemplatesPass;
+use Symfony\Component\DependencyInjection\Compiler\ResolveChildDefinitionsPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Dumper\XmlDumper;
 use Symfony\Component\DependencyInjection\Dumper\YamlDumper;
@@ -70,7 +71,7 @@ class BundleTest extends TestCase
     {
         $container = $this->loadContainer('event_store', 'plugins');
 
-        $eventStore = $container->get('prooph_event_store.main_store');
+        $eventStore = $container->get(TestServices::EVENT_STORE_SERVICE_ID_PREFIX . 'main_store');
         self::assertInstanceOf(EventStore::class, $eventStore);
 
         $plugin = $container->get(BlackHole::class);
@@ -89,7 +90,7 @@ class BundleTest extends TestCase
     {
         $container = $this->loadContainer('event_store', 'metadata_enricher');
 
-        $eventStore = $container->get('prooph_event_store.main_store');
+        $eventStore = $container->get(TestServices::EVENT_STORE_SERVICE_ID_PREFIX . 'main_store');
         self::assertInstanceOf(EventStore::class, $eventStore);
 
         $metadataEnricherPlugin = $container->get('prooph_event_store.metadata_enricher_plugin.main_store');
@@ -158,7 +159,7 @@ class BundleTest extends TestCase
 
     private function compileContainer(ContainerBuilder $container)
     {
-        $container->getCompilerPassConfig()->setOptimizationPasses([new ResolveDefinitionTemplatesPass()]);
+        $container->getCompilerPassConfig()->setOptimizationPasses([new ResolveChildDefinitionsPass()]);
         $container->getCompilerPassConfig()->setRemovingPasses([]);
 
         $container->compile();

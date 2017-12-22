@@ -1,10 +1,12 @@
 services:
     'ProophTest\Bundle\EventStore\DependencyInjection\Fixture\Plugin\BlackHole':
         class: ProophTest\Bundle\EventStore\DependencyInjection\Fixture\Plugin\BlackHole
+        public: true
         tags:
           - { name: 'prooph_event_store.main_store.plugin' }
 
     'ProophTest\Bundle\EventStore\DependencyInjection\Fixture\Plugin\GlobalBlackHole':
-            class: ProophTest\Bundle\EventStore\DependencyInjection\Fixture\Plugin\GlobalBlackHole
-            tags:
-              - { name: 'prooph_event_store.plugin' }
+        class: ProophTest\Bundle\EventStore\DependencyInjection\Fixture\Plugin\GlobalBlackHole
+        public: true
+        tags:
+          - { name: 'prooph_event_store.plugin' }

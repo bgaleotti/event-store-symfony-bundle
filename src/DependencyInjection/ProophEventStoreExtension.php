@@ -12,10 +12,12 @@ declare(strict_types=1);
 namespace Prooph\Bundle\EventStore\DependencyInjection;
 
 use Prooph\EventStore\EventStore;
+use Prooph\EventStore\Metadata\MetadataEnricherAggregate;
+use Prooph\EventStore\Metadata\MetadataEnricherPlugin;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -50,6 +52,7 @@ final class ProophEventStoreExtension extends Extension
         }
 
         if (! empty($config['projections'])) {
+            // FIXME: Missing second argument
             $this->loadProjections($config, $container);
         }
 
@@ -156,9 +159,11 @@ final class ProophEventStoreExtension extends Extension
         $eventStoreDefinition = $container
             ->setDefinition(
                 $eventStoreId,
-                new DefinitionDecorator('prooph_event_store.store_definition')
+                new ChildDefinition('prooph_event_store.store_definition')
             )
             ->setFactory([new Reference('prooph_event_store.store_factory'), 'createEventStore'])
+            // TODO: Remove me
+            ->setPublic(true)
             ->setArguments(
                 [
                     $name,
@@ -175,8 +180,10 @@ final class ProophEventStoreExtension extends Extension
                 $repositoryDefinition = $container
                     ->setDefinition(
                         $repositoryName,
-                        new DefinitionDecorator('prooph_event_store.repository_definition')
+                        new ChildDefinition('prooph_event_store.repository_definition')
                     )
+                    // TODO: Remove me
+                    ->setPublic(true)
                     ->setFactory([new Reference('prooph_event_store.repository_factory'), 'create'])
                     ->setArguments(
                         [
@@ -198,17 +205,21 @@ final class ProophEventStoreExtension extends Extension
         $metadataEnricherAggregateDefinition = $container
             ->setDefinition(
                 $metadataEnricherAggregateId,
-                new DefinitionDecorator('prooph_event_store.metadata_enricher_aggregate_definition')
+                new ChildDefinition('prooph_event_store.metadata_enricher_aggregate_definition')
             )
-            ->setClass('%prooph_event_store.metadata_enricher_aggregate.class%');
+            // TODO: Remove me
+            ->setPublic(true)
+            ->setClass(MetadataEnricherAggregate::class);
 
         $metadataEnricherId = sprintf('prooph_event_store.%s.%s', 'metadata_enricher_plugin', $name);
 
         $metadataEnricherDefinition = $container
             ->setDefinition(
                 $metadataEnricherId,
-                new DefinitionDecorator('prooph_event_store.metadata_enricher_plugin_definition')
+                new ChildDefinition('prooph_event_store.metadata_enricher_plugin_definition')
             )
-            ->setClass('%prooph_event_store.metadata_enricher_plugin.class%');
+            // TODO: Remove me
+            ->setPublic(true)
+            ->setClass(MetadataEnricherPlugin::class);
     }
 }
