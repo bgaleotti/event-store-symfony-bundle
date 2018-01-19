@@ -30,7 +30,7 @@ final class ProjectorPass implements CompilerPassInterface
 
             $reflClass = new ReflectionClass($projectorDefinition->getClass());
             if (! $reflClass->implementsInterface(ReadModelProjection::class) && ! $reflClass->implementsInterface(Projection::class)) {
-                throw new RuntimeException(sprintf('Tagged service "%" must implement "%s" or "%s" ', $id, ReadModelProjection::class, Projection::class));
+                throw new RuntimeException(sprintf('Tagged service "%s" must implement "%s" or "%s" ', $id, ReadModelProjection::class, Projection::class));
             }
 
             $tags = $projectorDefinition->getTag(ProophEventStoreExtension::TAG_PROJECTION);
@@ -50,17 +50,17 @@ final class ProjectorPass implements CompilerPassInterface
                         throw new RuntimeException(sprintf('"read_model" argument is missing from on "prooph_event_store.projection" tagged service "%s"',
                             $id));
                     }
-                    $container->setAlias(
-                        sprintf('%s.%s.read_model', ProophEventStoreExtension::TAG_PROJECTION, $tag['projection_name']),
-                        $tag['read_model']
-                    );
+
+                    $readModelProjectionAlias = sprintf('%s.%s.read_model', ProophEventStoreExtension::TAG_PROJECTION, $tag['projection_name']);
+
+                    $container->setAlias($readModelProjectionAlias, $tag['read_model']);
+                    $container->getAlias($readModelProjectionAlias)->setPublic(true);
                 }
 
-                //alias definition for using the correct ProjectionManager
-                $container->setAlias(
-                    sprintf('%s.%s.projection_manager', ProophEventStoreExtension::TAG_PROJECTION, $tag['projection_name']),
-                    sprintf('prooph_event_store.projection_manager.%s', $tag['projection_manager'])
-                );
+                // alias definition for using the correct ProjectionManager
+                $projectionManagerAlias = sprintf('%s.%s.projection_manager', ProophEventStoreExtension::TAG_PROJECTION, $tag['projection_name']);
+                $container->setAlias($projectionManagerAlias, sprintf('prooph_event_store.projection_manager.%s', $tag['projection_manager']));
+                $container->getAlias($projectionManagerAlias)->setPublic(true);
 
                 if ($id !== sprintf('%s.%s', ProophEventStoreExtension::TAG_PROJECTION, $tag['projection_name'])) {
                     $container->setAlias(sprintf('%s.%s', ProophEventStoreExtension::TAG_PROJECTION, $tag['projection_name']), $id);
