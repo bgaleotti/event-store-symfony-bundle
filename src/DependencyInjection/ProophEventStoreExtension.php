@@ -76,7 +76,8 @@ final class ProophEventStoreExtension extends Extension
                     new Reference($projectionManagerConfig['connection']),
                     $projectionManagerConfig['event_streams_table'],
                     $projectionManagerConfig['projections_table'],
-                ]);
+                ])
+                ->setPublic(true);
 
             $projectorManagerId = sprintf('prooph_event_store.projection_manager.%s', $projectionManagerName);
             $container->setDefinition(
