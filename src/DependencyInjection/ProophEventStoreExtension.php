@@ -14,6 +14,7 @@ namespace Prooph\Bundle\EventStore\DependencyInjection;
 use Prooph\EventStore\EventStore;
 use Prooph\EventStore\Metadata\MetadataEnricherAggregate;
 use Prooph\EventStore\Metadata\MetadataEnricherPlugin;
+use Prooph\EventStore\Projection\ProjectionManager;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -68,6 +69,7 @@ final class ProophEventStoreExtension extends Extension
         foreach ($config['projection_managers'] as $projectionManagerName => $projectionManagerConfig) {
             $projectionManagerDefintion = new Definition();
             $projectionManagerDefintion
+                ->setClass(ProjectionManager::class)
                 ->setFactory([new Reference('prooph_event_store.projection_factory'), 'createProjectionManager'])
                 ->setArguments([
                     new Reference($projectionManagerConfig['event_store']),
