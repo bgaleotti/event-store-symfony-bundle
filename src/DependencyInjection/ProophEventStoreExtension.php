@@ -67,8 +67,8 @@ final class ProophEventStoreExtension extends Extension
         $projectionManagers = [];
 
         foreach ($config['projection_managers'] as $projectionManagerName => $projectionManagerConfig) {
-            $projectionManagerDefintion = new Definition();
-            $projectionManagerDefintion
+            $projectionManagerDefinition = new Definition();
+            $projectionManagerDefinition
                 ->setClass(ProjectionManager::class)
                 ->setFactory([new Reference('prooph_event_store.projection_factory'), 'createProjectionManager'])
                 ->setArguments([
@@ -82,7 +82,7 @@ final class ProophEventStoreExtension extends Extension
             $projectorManagerId = sprintf('prooph_event_store.projection_manager.%s', $projectionManagerName);
             $container->setDefinition(
                 $projectorManagerId,
-                $projectionManagerDefintion
+                $projectionManagerDefinition
             );
 
             $this->loadProjections($projectionManagerConfig, $projectionManagerName, $container);
@@ -111,6 +111,8 @@ final class ProophEventStoreExtension extends Extension
                     (new Definition())
                         ->setClass($projectionConfig['projection'])
                         ->addTag(static::TAG_PROJECTION, $tag)
+                        ->setPublic(true)
+                        ->setAutowired(true)
                 );
         }
     }
